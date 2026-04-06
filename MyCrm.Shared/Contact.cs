@@ -1,9 +1,7 @@
-﻿namespace MyCrm.Web.Models
+﻿namespace MyCrm.Shared
 {
     public class Contact
     {
-        public Company company { get; set; };
-
         public int Id { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Surname { get; set; } = string.Empty;
