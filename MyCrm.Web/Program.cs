@@ -1,11 +1,14 @@
 using Microsoft.EntityFrameworkCore;
 using MyCrm.Web.Components;
 using MyCrm.Web.Data;
+using MyCrm.Web.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
+
+builder.Services.AddScoped<CompanyService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
