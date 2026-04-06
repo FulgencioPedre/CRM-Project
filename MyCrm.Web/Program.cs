@@ -9,6 +9,8 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlServer(connectionString));
 
 builder.Services.AddScoped<CompanyService>();
+builder.Services.AddScoped<ContactService>();
+builder.Services.AddScoped<ProjectService>();
 
 // Add services to the container.
 builder.Services.AddRazorComponents()
