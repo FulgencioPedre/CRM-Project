@@ -6,13 +6,13 @@
 @inject NavigationManager Navigation
 @rendermode InteractiveServer
 
+<PageTitle>Company Form - MyCRM</PageTitle>
 
-<h1>ADD A NEW COMPANY</h1>
 
 <div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header @(Id == null ? "bg-success" : "bg-primary") text-white">
-            <h3>@(Id == null ? "ADD Company" : "Update Company")</h3>
+            <h3>@(Id == null ? "Add Company" : "Modify Company")</h3>
         </div>
         <div class="card-body">
             <EditForm Model="company" OnValidSubmit="Save">
@@ -42,7 +42,7 @@
                 <div class="d-flex justify-content-between">
                     <button type="button" class="btn btn-secondary" @onclick="Return">Cancel</button>
                     <button type="submit" class="btn btn-success">
-                        @(Id == null ? "Create Company" : "Save Changes")
+                        @(Id == null ? "Create" : "Save")
                     </button>
                 </div>
             </EditForm>

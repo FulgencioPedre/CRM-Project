@@ -17,6 +17,10 @@ namespace MyCrm.Web.Service
 
         public async Task Add(Project pr)
         {
+            if((pr.Status == ProjectStatus.Finished || pr.Status == ProjectStatus.Cancelled || pr.Status == ProjectStatus.Invoiced) && pr.EndingDate == default)
+            {
+                pr.EndingDate = DateTime.Now;
+            }
             context.Projects.Add(pr);
             await context.SaveChangesAsync();
         }
@@ -43,10 +47,20 @@ namespace MyCrm.Web.Service
                 if (!string.IsNullOrEmpty(pr.Description)) projectDb.Description = pr.Description;
                 if (pr.StartingDate != default) projectDb.StartingDate = pr.StartingDate;
 
-                if (projectDb.Status == ProjectStatus.Finished)
+                if (projectDb.Status == ProjectStatus.Finished || projectDb.Status == ProjectStatus.Cancelled || projectDb.Status == ProjectStatus.Invoiced)
+                {
+                    if(projectDb.EndingDate == default)
+                    {
+                        projectDb.EndingDate = DateTime.Now;
+                    }
+                }
+                else
                 {
                     projectDb.EndingDate = default;
                 }
+
+                projectDb.Status = pr.Status;
+                projectDb.Budget = pr.Budget;
             }
             await context.SaveChangesAsync();
         }
@@ -58,12 +72,17 @@ namespace MyCrm.Web.Service
             if (projectDb != null)
             {
                 projectDb.Status = newStatus;
-                await context.SaveChangesAsync();
+                
 
-                if(projectDb.Status == ProjectStatus.Finished)
+                if(projectDb.Status == ProjectStatus.Finished || projectDb.Status == ProjectStatus.Cancelled || projectDb.Status == ProjectStatus.Invoiced)
+                {
+                    projectDb.EndingDate = DateTime.Now;
+                }
+                else
                 {
                     projectDb.EndingDate = default;
                 }
+                await context.SaveChangesAsync();
             }
         }
 

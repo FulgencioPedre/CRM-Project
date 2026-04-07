@@ -6,7 +6,7 @@ namespace MyCrm.Shared
     {
 
         public bool IsActive { get; set; } = true;
-        public enum ProjectStatus {Negotiation, Accepted, InProcess, Finished};
+        public enum ProjectStatus {Negotiation, Aproved, Active, Delayed, Paused, Finished, Cancelled, Ivoiced};
 
         public int Id { get; set; }
 
@@ -20,6 +20,10 @@ namespace MyCrm.Shared
         public DateTime StartingDate { get; set; }
         public DateTime EndingDate { get; set; }
         public ProjectStatus Status { get; set; }
+
+        [Required(ErrorMessage = "The Budget of this project is Required")]
+        [Range(0, 99999999, ErrorMessage = "The Budget has to be in a positive range")]
+        public double Budget { get; set; }
 
 
 
