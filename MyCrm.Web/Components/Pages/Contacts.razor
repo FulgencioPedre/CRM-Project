@@ -1,0 +1,95 @@
+﻿@page "/contacts"
+@page "/contacts/{CompanyId:int}"
+@using MyCrm.Shared
+@using MyCrm.Web.Service
+@inject ContactService ContactService
+@inject CompanyService CompanyService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+<PageTitle>Contacts - MyCRM</PageTitle>
+<div style="display: flex; align-items: center;">
+    <h1>Contacts</h1>
+    <NavLink class="btn btn-primary" href="@(CompanyId.HasValue ? $"/contactform/new/{CompanyId}" : "/contactform")" style="margin-left: auto">
+        Add Contact
+    </NavLink>
+</div>
+
+@if(allContacts == null)
+{
+    <p><em>Connecting to DataBase...</em></p>
+}
+else if (!allContacts.Any())
+{
+    <div class="alert-info">
+        There are no contacts added!
+    </div>
+}
+else
+{
+    <input type="text" class="form-control mb-3" placeholder="Search Contact..." @bind-value="searchText" @bind-value:event="oninput"/>
+    @foreach(var group in filteredContacts.GroupBy(c => c.Company?.Name ?? "No Company")){
+        <h3 class="mt-4 text-primary border-bottom">@group.Key</h3>
+        <ul class="list-unstyled">
+            @foreach(var c in group)
+            {
+                <li class="shadow-sm p-2 mb-2 bg-white rounded border-start border-4 border-primary">
+                    @c.Surname, @c.Name | <strong>@c.Email/@c.Phone</strong>
+                    <div class="d-flex" style="margin-left: auto">
+                        <NavLink class="btn btn-primary" href=@($"/contactform/{c.Id}")>
+                            Modify
+                        </NavLink>
+                        <button type="button" class="btn btn-danger" @onclick="() => Delete(c.Id)">
+                            Delete
+                        </button>
+                    </div>
+                   
+                </li>
+
+                
+            }
+        </ul>
+    }
+       
+}
+@code {
+    [Parameter] public int? CompanyId { get; set; }
+
+    private List<Contact>? allContacts;
+    private string searchText = "";
+
+    private IEnumerable<Contact> filteredContacts =>
+     allContacts?.Where(c => string.IsNullOrWhiteSpace(searchText)
+         || c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+         || c.Surname.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+         || (c.Company?.Name?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
+     ?? Enumerable.Empty<Contact>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadContacts();
+    }
+
+    private async Task LoadContacts()
+    {
+        if (CompanyId.HasValue)
+        {
+            allContacts = await ContactService.GetByCompany(CompanyId.Value);
+        }
+        else
+        {
+            allContacts = await ContactService.GetAll();  
+        }
+    }
+
+    private async Task Delete(int id)
+    {
+        bool confirm = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete it?");
+        if (confirm)
+        {
+            await ContactService.Delete(id);
+            await LoadContacts();
+        }
+
+    }
+}

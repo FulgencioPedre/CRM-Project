@@ -1,5 +1,7 @@
 ﻿@page "/projectform"
 @page "/projectform/{Id:int}"
+@page "/projectform/new/{PreSelectedCompanyId:int}"
+
 @using MyCrm.Web.Service
 @using MyCrm.Shared
 @inject ProjectService ProjectService
@@ -8,7 +10,7 @@
 @rendermode InteractiveServer
 <PageTitle>Project Form - MyCRM</PageTitle>
 
-<div class="conteiner mt-4">
+<div class="container mt-4">
     <div class="card shadow-sm">
         <div class="card-header @(Id == null ? "bg-success" : "bg-primary") text-white">
             <h3>@(Id == null ? "Add Project" : "Modify Project")</h3>
@@ -30,17 +32,30 @@
                 <EditForm Model="project" OnValidSubmit="Save">
                     <DataAnnotationsValidator />
                     <ValidationSummary class="text-danger" />
-                    <div class="mb-3">
-                        <label class="form-label">Title</label>
-                        <InputText @bind-Value="project.Name" class="form-control" />
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Title</label>
+                            <InputText @bind-Value="project.Name" class="form-control" />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Description</label>
+                            <InputTextArea @bind-Value="project.Description" class="form-control" rows="4" cols="30"/>
+                        </div>
                     </div>
 
-                    <div class=" mb-3">
-                        <label class="form-label">Description</label>
-                            <textarea rows="4" cols="30">
-                                <InputText @bind-Value="project.Description" class="form-control" />
-                            </textarea>
-                    </div>
+                   
+                   <div class="row">
+                        <div class="col-mb-6 mb-3">
+                            <label class="form-label">Budget</label>
+                            <InputNumber @bind-Value="project.Budget" class="form-control" />
+                        </div>
+
+                        <div class="col-mb-6 mb-3">
+                            <label class="form-label">Maximum Date</label>
+                            <InputDate @bind-Value="project.EndingDate" class="form-control" />
+                        </div>
+                   </div>
 
                     <div class="row">
 
@@ -63,25 +78,31 @@
                                 }
                             </InputSelect>
                         </div>
-                        
+                    </div>
+                    <div class="d-flex justify-content-between gap-2">
+                        <button type="button" class=" btn btn-secondary" @onclick="Return">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            @(Id == null ? "Create" : "Save")
+                        </button>
                     </div>
                 </EditForm>
             }
         </div>
-        <div class="d-flex justify-content-between gap-2">
-            <button type="button" class=" btn btn-secondary" @onclick="Return">Cancel</button>
-            <button type="submit" class="btn btn-primary">
-                @(Id == null ? "Create" : "Save")
-            </button>
-        </div>
+        
     </div>
 </div>
 
 @code {
     [Parameter] public int? Id { get; set; }
+    [Parameter] public int? PreSelectedCompanyId { get; set; }
     Project project = new() { StartingDate = DateTime.Now };
 
-    private List<Company>? allCompanies;
+    private List<Company> allCompanies = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        allCompanies = await CompanyService.GetAll();
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -90,9 +111,9 @@
             var found = await ProjectService.GetById(Id.Value);
             if (found != null) project = found;
         }
-        else
+        else if (PreSelectedCompanyId.HasValue)
         {
-            project = new Project();
+            project.CompanyId = PreSelectedCompanyId.Value;
         }
     }
 

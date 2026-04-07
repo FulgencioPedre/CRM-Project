@@ -17,10 +17,6 @@ namespace MyCrm.Web.Service
 
         public async Task Add(Project pr)
         {
-            if((pr.Status == ProjectStatus.Finished || pr.Status == ProjectStatus.Cancelled || pr.Status == ProjectStatus.Invoiced) && pr.EndingDate == default)
-            {
-                pr.EndingDate = DateTime.Now;
-            }
             context.Projects.Add(pr);
             await context.SaveChangesAsync();
         }
@@ -47,18 +43,6 @@ namespace MyCrm.Web.Service
                 if (!string.IsNullOrEmpty(pr.Description)) projectDb.Description = pr.Description;
                 if (pr.StartingDate != default) projectDb.StartingDate = pr.StartingDate;
 
-                if (projectDb.Status == ProjectStatus.Finished || projectDb.Status == ProjectStatus.Cancelled || projectDb.Status == ProjectStatus.Invoiced)
-                {
-                    if(projectDb.EndingDate == default)
-                    {
-                        projectDb.EndingDate = DateTime.Now;
-                    }
-                }
-                else
-                {
-                    projectDb.EndingDate = default;
-                }
-
                 projectDb.Status = pr.Status;
                 projectDb.Budget = pr.Budget;
             }
@@ -74,14 +58,7 @@ namespace MyCrm.Web.Service
                 projectDb.Status = newStatus;
                 
 
-                if(projectDb.Status == ProjectStatus.Finished || projectDb.Status == ProjectStatus.Cancelled || projectDb.Status == ProjectStatus.Invoiced)
-                {
-                    projectDb.EndingDate = DateTime.Now;
-                }
-                else
-                {
-                    projectDb.EndingDate = default;
-                }
+            
                 await context.SaveChangesAsync();
             }
         }
@@ -92,6 +69,13 @@ namespace MyCrm.Web.Service
                 .Include(pr => pr.Company)
                 .Where(pr => pr.IsActive)
                 .OrderBy(pr => pr.Name)
+                .ToListAsync();
+        }
+
+        public async Task<List<Project>> GetByCompany(int companyId)
+        {
+            return await context.Projects
+                .Where(pr => pr.IsActive && (pr.CompanyId == companyId))
                 .ToListAsync();
         }
 

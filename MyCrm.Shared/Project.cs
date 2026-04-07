@@ -6,14 +6,14 @@ namespace MyCrm.Shared
     {
 
         public bool IsActive { get; set; } = true;
-        public enum ProjectStatus {Negotiation, Aproved, Active, Delayed, Paused, Finished, Cancelled, Ivoiced};
+        public enum ProjectStatus {Negotiation, Aproved, Active, Delayed, Paused, Finished, Cancelled, Invoiced};
 
         public int Id { get; set; }
 
         [Required(ErrorMessage = "The name is empty")]
         public string Name { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "The name is empty")]
+        [Required(ErrorMessage = "The description is empty")]
         [StringLength(300, ErrorMessage = "The description is too long (300ch max)")]
         public string Description { get; set; } = string.Empty;
 
@@ -22,7 +22,6 @@ namespace MyCrm.Shared
         public ProjectStatus Status { get; set; }
 
         [Required(ErrorMessage = "The Budget of this project is Required")]
-        [Range(0, 99999999, ErrorMessage = "The Budget has to be in a positive range")]
         public double Budget { get; set; }
 
 

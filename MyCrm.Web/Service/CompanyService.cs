@@ -45,7 +45,7 @@ namespace MyCrm.Web.Service
 
             if (companyDb != null) { 
                 if(!string.IsNullOrEmpty(c.Name)) companyDb.Name = c.Name;
-                if(c.CIF != 0) companyDb.CIF = c.CIF;
+                if(!string.IsNullOrEmpty(c.CIF)) companyDb.CIF = c.CIF;
                 if (!string.IsNullOrEmpty(c.Address)) companyDb.Address = c.Address;
                 if(!string.IsNullOrEmpty(c.Country)) companyDb.Country = c.Country;
             }
@@ -66,7 +66,7 @@ namespace MyCrm.Web.Service
         public async Task<List<Company>> GetFiltered(string term)
         {
             return await context.Companies
-                .Where(c=> c.IsActive && (c.Name.Contains(term) || c.CIF.ToString().Contains(term)))
+                .Where(c=> c.IsActive && (c.Name.Contains(term) || c.CIF.Contains(term)))
                 .ToListAsync();
         }
 
@@ -78,7 +78,7 @@ namespace MyCrm.Web.Service
                 .FirstOrDefaultAsync(c => c.Id == id);
         }
 
-        public async Task<bool> Exists(int cif)
+        public async Task<bool> Exists(string cif)
         {
             return await context.Companies.AnyAsync(c => c.CIF == cif);
         }

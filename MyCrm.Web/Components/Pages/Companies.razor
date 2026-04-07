@@ -10,7 +10,7 @@
 <div style="display: flex; align-items: center;">
     <h1>Companies</h1>
     <NavLink class="btn btn-primary" href="companies/companyform" style="margin-left: auto">
-        ADD COMPANY
+        Add Company
     </NavLink>
 </div>
 
@@ -27,20 +27,27 @@ else if (!allCompanies.Any())
 }
 else
 {
-    <ul>
-        @foreach(var c in allCompanies)
+
+    <ul class="list-unstyled">
+        <input type="text" class="form-control mb-3" placeholder="Search Company..." @bind-value="searchText" @bind-value:event="oninput" />
+        @foreach (var c in filteredCompanies)
         {
-            <li>
-                <div style="display: flex">
-                    <h4>@c.Name - <strong>@c.CIF</strong></h4>
-                    <NavLink class="btn btn-primary" href="@($"companies/companyform/{c.Id}")">
+            <li class="shadow-sm p-2 mb-2 bg-white rouder border-start border-4 border-primary">
+                <strong>@c.Name - @c.CIF</strong> | @c.Address - @c.Country
+                <div class="flex" style="margin-left: auto">
+                    <NavLink class="btn btn-primary ps-2" href="@($"companies/companyform/{c.Id}")">
                         Modify
                     </NavLink>
                     <button type="button" class="btn btn-danger ms-2" @onclick="() => Delete(c.Id)">
-                        Delete 
+                        Delete
                     </button>
+                    <NavLink class="btn btn-primary ps-2" href="@($"/contacts/{c.Id}")">
+                        Show Contacts
+                    </NavLink>
+                    <NavLink class="btn btn-primary ps-2" href="@($"/{c.Id}")">
+                        Show Projects
+                    </NavLink>
                 </div>
-                
             </li>
         }
     </ul>
@@ -49,6 +56,9 @@ else
 
 @code {
     private List<Company>? allCompanies;
+    private string searchText = "";
+    private IEnumerable<Company> filteredCompanies => allCompanies?.Where(c => string.IsNullOrWhiteSpace(searchText)
+    || c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase) || (c.CIF != null && c.CIF.Contains(searchText, StringComparison.OrdinalIgnoreCase))) ?? Enumerable.Empty<Company>();
 
     protected override async Task OnInitializedAsync()
     {

@@ -4,7 +4,7 @@ namespace MyCrm.Shared
 {
     public class Contact
     {
-        public bool IsActive { get; set; }
+        public bool IsActive { get; set; } = true;
 
         public int Id { get; set; }
 

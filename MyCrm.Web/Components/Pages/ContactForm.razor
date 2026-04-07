@@ -1,0 +1,130 @@
+﻿@page "/contactform"
+@page "/contactform/{Id:int}"
+@page "/contactform/new/{PreSelectedCompanyId:int}"
+@using MyCrm.Web.Service
+@using MyCrm.Shared
+@inject ContactService ContactService
+@inject CompanyService CompanyService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+<PageTitle>Contact Form - MyCRM</PageTitle>
+
+<div class="container mt-4">
+    <div class="card shadow">
+        <div class="card-header @(Id == null ? "bg-success" : "bg-primary") text-white">
+            <h3>@(Id == null ? "Create Contact" : "Update Contact")</h3>
+        </div> 
+        
+        <div class="card-body">
+            @if(allCompanies == null)
+            {
+                <p>Loading Companies...</p>
+            }
+            else if (!allCompanies.Any())
+            {
+                <div class="alert-warning">
+                    <p>You can not create any Contacts without any Companies Available</p>
+                    <a href="companies/companyform" class="btn btn-warning">Add Company Now</a>
+                </div>
+            }
+            else
+            {
+                <EditForm Model="contact" OnValidSubmit="Save">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Name</label>
+                        <InputText @bind-Value="contact.Name" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Surname</label>
+                        <InputText @bind-Value="contact.Surname" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Email</label>
+                        <InputText @bind-Value="contact.Email" class="form-control" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Phone</label>
+                        <InputText @bind-Value="contact.Phone" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Company</label>
+                        <InputSelect @bind-Value="contact.CompanyId" class="form-select">
+                            @foreach(var c in allCompanies)
+                            {
+                                <option value="@c.Id">@c.Name</option>
+                            }
+                        </InputSelect>
+                </div>
+                <div class="d-flex justify-content-between gap-2">
+                    <button type="button" class=" btn btn-secondary" @onclick="Return">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        @(Id == null ? "Create" : "Save")
+                    </button>
+                </div>
+            </EditForm>
+            }
+            
+        </div>
+    </div>
+</div>
+
+
+@code{
+    [Parameter] public int? Id { get; set; }
+    [Parameter] public int? PreSelectedCompanyId { get; set; }
+
+    private Contact contact = new();
+    private List<Company>? allCompanies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allCompanies = await CompanyService.GetAll();
+        if (Id.HasValue)
+        {
+            var found = await ContactService.GetById(Id.Value);
+            if (found != null) contact = found;
+        }
+        else if (PreSelectedCompanyId.HasValue)
+        {
+            contact.CompanyId = PreSelectedCompanyId.Value;
+        }
+    }
+
+    private async Task Save()
+    {
+        if(Id == null)
+        {
+            await ContactService.Add(contact);
+        }
+        else
+        {
+            await ContactService.Update(contact);
+        }
+        Return();
+    }
+
+    private void Return()
+    {
+        if (PreSelectedCompanyId.HasValue)
+        {
+            Navigation.NavigateTo($"/contacts/{PreSelectedCompanyId}");
+        }
+        else
+        {
+            Navigation.NavigateTo("/contacts");
+        }
+    }
+
+}

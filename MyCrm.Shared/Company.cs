@@ -15,8 +15,8 @@ namespace MyCrm.Shared
         [StringLength(100, ErrorMessage ="Name is to long (100 ch max.)")]
         public string Name { get; set; } = string.Empty;
 
-        
-        public int CIF { get; set; }
+        [Required(ErrorMessage = "The CIF is empty")]
+        public string CIF { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "The Country is empty")]
         public string Country { get; set; } = string.Empty;

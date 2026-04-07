@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyCrm.Shared;
 using MyCrm.Web.Data;
+using MyCrm.Web.Migrations;
 
 namespace MyCrm.Web.Service
 {
@@ -66,6 +67,13 @@ namespace MyCrm.Web.Service
         {
             return await context.Contacts
                 .FirstOrDefaultAsync(c => c.Id == id);
+        }
+
+        public async Task<List<Contact>> GetByCompany(int companyId)
+        {
+            return await context.Contacts
+                .Where(c => c.IsActive && (c.CompanyId == companyId))
+                .ToListAsync();
         }
 
         public async Task<bool> Exists(string email)
