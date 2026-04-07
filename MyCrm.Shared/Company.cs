@@ -1,4 +1,6 @@
-﻿namespace MyCrm.Shared
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MyCrm.Shared
 {
     public class Company
     {
@@ -8,9 +10,19 @@
         public bool IsActive { get; set; } = true;
 
         public int Id { get; set; }
+
+        [Required(ErrorMessage = "The name is empty")]
+        [StringLength(100, ErrorMessage ="Name is to long (100 ch max.)")]
         public string Name { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "The CIF is empty")]
+        [StringLength(15, ErrorMessage = "Name is to long (15 ch max.)")]
         public int CIF { get; set; }
+
+        [Required(ErrorMessage = "The Country is empty")]
         public string Country { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "The Address is empty")]
         public string Address { get; set; } = string.Empty;
 
     }
