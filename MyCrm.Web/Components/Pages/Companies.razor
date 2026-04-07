@@ -1,0 +1,74 @@
+﻿@page "/companies"
+@using MyCrm.Shared
+@using MyCrm.Web.Service
+@inject CompanyService CompanyService
+@inject IJSRuntime JS
+@rendermode InteractiveServer
+
+
+<PageTitle>Companies - MyCRM</PageTitle>
+<div style="display: flex; align-items: center;">
+    <h1>Companies</h1>
+    <NavLink class="btn btn-primary" href="companies/companyform" style="margin-left: auto">
+        ADD COMPANY
+    </NavLink>
+</div>
+
+
+@if(allCompanies == null)
+{
+    <p><em>Connecting to DataBase...</em></p>
+}
+else if (!allCompanies.Any())
+{
+    <div class="alert-info">
+        There are no Companies Available at the DataBase.
+    </div>
+}
+else
+{
+    <ul>
+        @foreach(var c in allCompanies)
+        {
+            <li>
+                <div style="display: flex">
+                    <h4>@c.Name - <strong>@c.CIF</strong></h4>
+                    <NavLink class="btn btn-primary" href="@($"companies/companyform/{c.Id}")">
+                        Modify
+                    </NavLink>
+                    <button type="button" class="btn btn-danger ms-2" @onclick="() => Delete(c.Id)">
+                        Delete 
+                    </button>
+                </div>
+                
+            </li>
+        }
+    </ul>
+}
+
+
+@code {
+    private List<Company>? allCompanies;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCompanies();
+    }
+
+    private async Task LoadCompanies()
+    {
+        allCompanies = await CompanyService.GetAll();
+    }
+    protected async Task Delete(int id)
+    {
+
+        bool confirmed = await JS.InvokeAsync<bool>("confirm", "Are you sure you want to delete it?");
+        if (confirmed)
+        {
+            await CompanyService.Delete(id);
+            await LoadCompanies();
+        }
+        
+    }
+
+}

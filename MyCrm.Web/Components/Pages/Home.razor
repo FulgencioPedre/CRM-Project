@@ -1,7 +1,44 @@
 ﻿@page "/"
+@using MyCrm.Shared
+@using MyCrm.Web.Service
+@inject ProjectService ProjectService
+@rendermode InteractiveServer
 
-<PageTitle>Home</PageTitle>
+<PageTitle>Projects - MyCRM</PageTitle>
+<div style="display: flex; align-items: center;">
+    <h1>Projects</h1>
+    <NavLink class="btn btn-primary" href="projectform" style="margin-left: auto;">
+        ADD/UPDATE
+    </NavLink>
+</div>
 
-<h1>Hello, world!</h1>
 
-Welcome to your new app.
+@if (allProjects == null)
+{
+    <p><em>Connecting to DataBase...</em></p>
+}
+else if (!allProjects.Any())
+{
+    <div class="alert-info">
+        There are no projects available. Time to create one!
+    </div>
+}
+else
+{
+    <ul>
+        @foreach(var p in allProjects)
+        {
+            <li>@p.Name - <strong>@p.Status</strong></li>
+        }
+    </ul>
+}
+
+
+@code{
+    private List<Project>? allProjects;
+
+    protected override async Task OnInitializedAsync()
+    {
+        allProjects = await ProjectService.GetAll();
+    }
+}

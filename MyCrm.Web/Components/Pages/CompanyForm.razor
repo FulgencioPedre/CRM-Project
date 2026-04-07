@@ -1,0 +1,83 @@
+﻿@page "/companies/companyform"
+@page "/companies/companyform/{Id:int}"
+@using MyCrm.Web.Service
+@using MyCrm.Shared
+@inject CompanyService CompanyService
+@inject NavigationManager Navigation
+@rendermode InteractiveServer
+
+
+<h1>ADD A NEW COMPANY</h1>
+
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header @(Id == null ? "bg-success" : "bg-primary") text-white">
+            <h3>@(Id == null ? "ADD Company" : "Update Company")</h3>
+        </div>
+        <div class="card-body">
+            <EditForm Model="company" OnValidSubmit="Save">
+                <DataAnnotationsValidator />
+                <ValidationSummary class="text-danger" />
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Nombre</label>
+                        <InputText @bind-Value="company.Name" class="form-control" />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">CIF</label>
+                        <InputNumber @bind-Value="company.CIF" class="form-control" />
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <InputText @bind-Value="company.Address" class="form-control" />
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Country</label>
+                    <InputText @bind-Value="company.Country" class="form-control" />
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <button type="button" class="btn btn-secondary" @onclick="Return">Cancel</button>
+                    <button type="submit" class="btn btn-success">
+                        @(Id == null ? "Create Company" : "Save Changes")
+                    </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+
+@code{
+    [Parameter] public int? Id { get; set; }
+    private Company company = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Id.HasValue)
+        {
+            var found = await CompanyService.GetById(Id.Value);
+            if (found != null) company = found;
+        }
+        else
+        {
+            company = new Company();
+        }
+    }
+
+    protected async Task Save()
+    {
+        if (Id == null) await CompanyService.Add(company);
+        else
+        {
+            await CompanyService.Update(company);
+        }
+
+        Navigation.NavigateTo("/companies");
+    }
+
+    protected void Return() => Navigation.NavigateTo("/companies");
+}
+
