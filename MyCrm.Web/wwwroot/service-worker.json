@@ -1,0 +1,5 @@
+// service-worker.js
+self.addEventListener('fetch', (event) => {
+    // Este código puede estar vacío, pero es necesario para que 
+    // Chrome y Edge activen el botón de "Instalar" PWA.
+});

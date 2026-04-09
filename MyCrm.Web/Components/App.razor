@@ -9,6 +9,8 @@
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="MyCrm.Web.styles.css" />
     <link rel="icon" type="image/png" href="favicon.png" />
+    <link rel="manifest" href="manifest.json" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <HeadOutlet @rendermode="InteractiveServer" />
 </head>
 
@@ -27,6 +29,12 @@
             anchorElement.click();
             anchorElement.remove();
             URL.revokeObjectURL(url);
+        }
+    </script>
+
+    <script>
+        if ('service-worker' in navigator) {
+            navigator.serviceWorker.register('service-worker.js');
         }
     </script>
 </body>
