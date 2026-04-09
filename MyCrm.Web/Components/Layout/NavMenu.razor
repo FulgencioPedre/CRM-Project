@@ -1,4 +1,5 @@
-﻿<div class="container py-3 px-3">
+﻿@inject IHostApplicationLifetime Lifetime
+<div class="container py-3 px-3">
     <strong class="text-white">RINCON CRM</strong>
 </div>
 <div class="nav-scrollable" onclick="OnEmptyClick">
@@ -26,5 +27,14 @@
                 CONTACTS
             </NavLink>
         </div>
+
+        <button class="btn btn-danger ms-3 mt-2" @onclick="CerrarApp">Cerrar App</button>
     </nav>
 </div>
+
+@code{
+    void CerrarApp()
+    {
+        Lifetime.StopApplication();
+    }
+}
