@@ -3,8 +3,15 @@ using MyCrm.Web.Components;
 using MyCrm.Web.Data;
 using MyCrm.Web.Service;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(new WebApplicationOptions
+{
+    Args = args,
+    ContentRootPath = AppContext.BaseDirectory,
+    WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot")
+});
+builder.WebHost.UseUrls("http://localhost:5050", "https://localhost:5001");
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 
 builder.Services.AddDbContext<AppDbContext>(options => options.UseSqlite("Data Source=asociacion.db"));
 
@@ -34,12 +41,20 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 app.UseAntiforgery();
 
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
+
+// Solo abre el navegador si estamos ejecutando el programa publicado
+if (!app.Environment.IsDevelopment())
+{
+    // Esto abre automáticamente tu navegador por defecto en la dirección del CRM
+    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("http://localhost:5050") { UseShellExecute = true });
+}
+
 
 app.Run();
