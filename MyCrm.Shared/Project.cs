@@ -14,7 +14,7 @@ namespace MyCrm.Shared
         public string Name { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "The description is empty")]
-        [StringLength(300, ErrorMessage = "The description is too long (300ch max)")]
+        [StringLength(1000, ErrorMessage = "The description is too long (300ch max)")]
         public string Description { get; set; } = string.Empty;
 
         public DateTime StartingDate { get; set; }

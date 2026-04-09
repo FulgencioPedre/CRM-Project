@@ -1,7 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using MyCrm.Shared;
 using MyCrm.Web.Data;
-using MyCrm.Web.Migrations;
 
 namespace MyCrm.Web.Service
 {

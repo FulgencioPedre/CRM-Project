@@ -1,6 +1,6 @@
-﻿@page "/projectform"
-@page "/projectform/{Id:int}"
-@page "/projectform/new/{PreSelectedCompanyId:int}"
+﻿@page "/projects/projectform"
+@page "/projects/projectform/{Id:int}"
+@page "/projects/projectform/new/{PreSelectedCompanyId:int}"
 
 @using MyCrm.Web.Service
 @using MyCrm.Shared
@@ -124,8 +124,8 @@
         {
             await ProjectService.Update(project);
         }
-        Navigation.NavigateTo("/");
+        Navigation.NavigateTo("/projects");
     }
 
-    private void Return() => Navigation.NavigateTo("/");
+    private void Return() => Navigation.NavigateTo("/projects");
 }

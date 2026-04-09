@@ -1,5 +1,6 @@
-﻿@page "/"
-@page "/{CompanyId:int}"
+﻿@page "/projects"
+@page "/projects/{CompanyId:int}"
+@using ClosedXML.Excel
 @using MyCrm.Shared
 @using MyCrm.Web.Service
 @inject ProjectService ProjectService
@@ -8,8 +9,14 @@
 @rendermode InteractiveServer
 
 <PageTitle>Projects - MyCRM</PageTitle>
-<div style="display: flex; align-items: center;">
-    <h1>Hi There! It's Time to Work!</h1>
+<div style="display: flex; align-items: center; gap: 15px;">
+    <h1>Projects</h1>
+    <NavLink class="btn btn-primary" href="@(CompanyId.HasValue ? $"/projects/projectform/new/{CompanyId}" : "/projects/projectform")" style="margin-left: auto;">
+        Add Project
+    </NavLink>
+    <button class="btn btn-success" @onclick="ExportToExcel">
+        Export
+    </button>
 </div>
 
 
@@ -25,7 +32,8 @@ else if (!allProjects.Any())
 }
 else
 {
-    @foreach (var group in filteredProjects.GroupBy(pr => pr.Status))
+    <input type="text" class="form-control mb-3" placeholder="Search Project..." @bind-value="searchText" @bind-value:event="oninput" />
+    @foreach (var group in filteredProjects.GroupBy(pr => pr.Company?.Name ?? "No Company"))
     {
         <h3 class="mt-5 mb-3 text-secondary border-bottom pb-2" style="font-size: 1.1rem; font-weight: 600;">
             <i class="bi bi-building me-2"></i> @group.Key
@@ -45,7 +53,7 @@ else
                         </div>
 
                         <h6 class="card-title mb-1 fw-bold text-dark">@pr.Name <i>- @pr.Budget€</i></h6>
-                       
+
 
                         <p class="text-muted mb-3" style="font-size: 0.85rem; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; height: 38px;">
                             @pr.Description
@@ -77,20 +85,21 @@ else
             }
         </div>
     }
-    
-    
+
+
 }
 
 
-@code{
-    [Parameter] public int? CompanyId {get; set;}
+@code {
+    [Parameter] public int? CompanyId { get; set; }
     private List<Project>? allProjects;
+    private string searchText = "";
 
-
-    private IEnumerable<Project> filteredProjects => allProjects?.Where(pr => pr.IsActive &&
-                                                                (pr.Status == Project.ProjectStatus.Active ||
-                                                                pr.Status == Project.ProjectStatus.Negotiation ||
-                                                                pr.Status == Project.ProjectStatus.Aproved)) ?? Enumerable.Empty<Project>();
+    private IEnumerable<Project> filteredProjects =>
+     allProjects?.Where(c => string.IsNullOrWhiteSpace(searchText)
+         || c.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase)
+         || (c.Company?.Name?.Contains(searchText, StringComparison.OrdinalIgnoreCase) ?? false))
+     ?? Enumerable.Empty<Project>();
 
     protected override async Task OnInitializedAsync()
     {
@@ -106,7 +115,7 @@ else
         {
             allProjects = await ProjectService.GetAll();
         }
-        
+
     }
     protected async Task Delete(int id)
     {
@@ -115,6 +124,57 @@ else
         {
             await ProjectService.Delete(id);
             await LoadProjects();
+        }
+    }
+
+    private async Task ExportToExcel()
+    {
+        using (var workbook = new XLWorkbook()){
+
+            //We create the sheet
+            var worksheet = workbook.Worksheets.Add("Projects");
+
+            //We establish the headers
+            worksheet.Cell(1, 1).Value = "ID";
+            worksheet.Cell(1, 2).Value = "Project Name";
+            worksheet.Cell(1, 3).Value = "Status";
+            worksheet.Cell(1, 4).Value = "Budget (€)";
+            worksheet.Cell(1, 5).Value = "Starting Date";
+            worksheet.Cell(1, 6).Value = "Company";
+
+            //HEADER DESIGN
+            var headerRow = worksheet.Row(1);
+            headerRow.Style.Font.Bold = true;
+            headerRow.Style.Fill.BackgroundColor = XLColor.FromHtml("#de5c14");
+            headerRow.Style.Font.FontColor = XLColor.Black;
+
+
+            int row = 2;
+
+            foreach (var pr in filteredProjects)
+            {
+                worksheet.Cell(row, 1).Value = pr.Id;
+                worksheet.Cell(row, 2).Value = pr.Name;
+                worksheet.Cell(row, 3).Value = pr.Status.ToString();
+                worksheet.Cell(row, 4).Value = pr.Budget;
+                worksheet.Cell(row, 5).Value = pr.StartingDate.ToShortDateString();
+                worksheet.Cell(row, 6).Value = pr.Company?.Name ?? "No Company";
+
+                row++;
+            }
+
+            worksheet.Columns().AdjustToContents();
+
+            using (var stream = new MemoryStream())
+            {
+                workbook.SaveAs(stream);
+                var content = stream.ToArray();
+
+                using var streamRef = new DotNetStreamReference(new MemoryStream(content));
+
+                await JS.InvokeVoidAsync("downloadFileFromStream", $"Projects_{DateTime.Now:yyyyMMdd}.xlsx", streamRef);
+            }
+
         }
     }
 }

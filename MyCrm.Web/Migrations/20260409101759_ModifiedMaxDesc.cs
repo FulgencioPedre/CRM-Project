@@ -5,7 +5,7 @@
 namespace MyCrm.Web.Migrations
 {
     /// <inheritdoc />
-    public partial class AddBooleanTrue : Migration
+    public partial class ModifiedMaxDesc : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
