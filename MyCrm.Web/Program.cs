@@ -9,7 +9,7 @@ var builder = WebApplication.CreateBuilder(new WebApplicationOptions
     ContentRootPath = AppContext.BaseDirectory,
     WebRootPath = Path.Combine(AppContext.BaseDirectory, "wwwroot")
 });
-builder.WebHost.UseUrls("http://localhost:5050", "https://localhost:5001");
+builder.WebHost.UseUrls("http://localhost:5050"W);
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 
